@@ -1,0 +1,18 @@
+@import "tailwindcss";
+
+@theme {
+  /* Definiujemy klasę animacji, z której skorzystamy w React (animate-matrix-pulse) */
+  --animate-matrix-pulse: matrixPulse 2s infinite ease-in-out;
+
+  /* Tworzymy samą animację (efekt ruchu i przezroczystości) */
+  @keyframes matrixPulse {
+    0%, 100% { transform: translateY(0); opacity: 0.3; }
+    50% { transform: translateY(-10px); opacity: 1; }
+  }
+}
+
+@layer base {
+  body {
+    background-color: black;
+  }
+}
