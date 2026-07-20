@@ -52,6 +52,10 @@ model ColorPreset {
   color2    String
   color3    String
   color4    String
+  color5    String @default("#ffffff")
+  clock  String  @default("#ffffff")
+  analyzerBrightness Int @default(100)
+  clockBrightness Int @default(1)
   isActive Boolean @default(false) //
   user     User     @relation(fields: [userId], references: [id])
   userId   Int
