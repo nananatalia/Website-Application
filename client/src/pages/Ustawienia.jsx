@@ -13,6 +13,7 @@ const builtInPresets = [
     color2: "#bf98f2",
     color3: "#ff98ff",
     color4: "#dc2626",
+    color5: "#ffffff",
   },
   {
     name: "Ocean",
@@ -20,6 +21,7 @@ const builtInPresets = [
     color2: "#0077be",
     color3: "#005f99",
     color4: "#003f66",
+    color5: "#ffffff",
   },
   {
     name: "Zachód słońca",
@@ -27,6 +29,7 @@ const builtInPresets = [
     color2: "#f7931e",
     color3: "#ffc107",
     color4: "#ff3d00",
+    color5: "#ffffff",
   },
   {
     name: "Neon",
@@ -34,6 +37,7 @@ const builtInPresets = [
     color2: "#ff073a",
     color3: "#00f0ff",
     color4: "#ff00ff",
+    color5: "#ffffff",
   },
 ];
 
@@ -42,13 +46,19 @@ const emptyColors = {
   color2: "#bf98f2",
   color3: "#ff98ff",
   color4: "#dc2626",
+  color5: "#ffffff",
+  clock: "#ffffff",
+  analyzerBrightness: 100,
+  clockBrightness: 1,
 };
 
 const colorLabels = {
-  color1: "Bas",
-  color2: "Niskie tony",
-  color3: "Wysokie tony",
-  color4: "Bardzo wysokie tony",
+  color1: "Bardzo cicho",
+  color2: "Umiarkowanie",
+  color3: "Głośno",
+  color4: "Bardzo głośno",
+  color5: "Opadający cień",
+  clock: "Kolor zegara",
 };
 
 function Ustawienia() {
@@ -76,6 +86,10 @@ function Ustawienia() {
           color2: active.color2,
           color3: active.color3,
           color4: active.color4,
+          color5: active.color5,
+          clock: active.clock ?? "#ffffff",
+          analyzerBrightness: active.analyzerBrightness ?? 100,
+          clockBrightness: active.clockBrightness ?? 1,
         });
       }
     } catch (err) {
@@ -146,6 +160,10 @@ function Ustawienia() {
         color2: preset.color2,
         color3: preset.color3,
         color4: preset.color4,
+        color5: preset.color5,
+        clock: preset.clock ?? "#ffffff",
+        analyzerBrightness: preset.analyzerBrightness ?? 100,
+        clockBrightness: preset.clockBrightness ?? 1,
       });
       fetchPresets();
     } catch (err) {
@@ -175,6 +193,10 @@ function Ustawienia() {
       color2: preset.color2,
       color3: preset.color3,
       color4: preset.color4,
+      color5: preset.color5,
+      clock: preset.clock ?? "#ffffff",
+      analyzerBrightness: preset.analyzerBrightness ?? 100,
+      clockBrightness: preset.clockBrightness ?? 1,
     });
   };
 
@@ -196,6 +218,7 @@ function Ustawienia() {
             color2: preset.color2,
             color3: preset.color3,
             color4: preset.color4,
+            color5: preset.color5,
           },
           { withCredentials: true },
         );
@@ -213,6 +236,7 @@ function Ustawienia() {
         color2: preset.color2,
         color3: preset.color3,
         color4: preset.color4,
+        color5: preset.color5,
       });
       setActivePresetId(targetId);
       setEditingId(null);
@@ -300,7 +324,7 @@ function Ustawienia() {
 
           {/* karty z kolorami */}
           <div className="grid grid-cols-2 gap-4 mb-6">
-            {Object.keys(emptyColors).map((key) => (
+            {["color1", "color2", "color3", "color4", "color5", "clock"].map((key) => (
               <div
                 key={key}
                 onClick={() =>
@@ -349,6 +373,34 @@ function Ustawienia() {
             </div>
           )}
 
+          {/* suwaki jasności */}
+          <div className="flex flex-col gap-4 mb-6">
+            <div className="flex flex-col gap-2">
+              <div className="flex justify-between">
+                <label className="font-semibold text-md">Jasność analizatora</label>
+                <span className="text-xs text-gray-400">{colors.analyzerBrightness}%</span>
+              </div>
+              <input
+                type="range" min={0} max={100} step={1}
+                value={colors.analyzerBrightness}
+                onChange={(e) => setColors(prev => ({ ...prev, analyzerBrightness: Number(e.target.value) }))}
+                className="w-full accent-orange-500"
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <div className="flex justify-between">
+                <label className="font-semibold text-md">Jasność zegara</label>
+                <span className="text-xs text-gray-400">{colors.clockBrightness}%</span>
+              </div>
+              <input
+                type="range" min={0} max={100} step={1}
+                value={colors.clockBrightness}
+                onChange={(e) => setColors(prev => ({ ...prev, clockBrightness: Number(e.target.value) }))}
+                className="w-full accent-orange-500"
+              />
+            </div>
+          </div>
+
           {/* przyciski zapisu i resetu */}
           <div className="flex gap-3 mt-6">
             {editingId ? (
@@ -394,6 +446,7 @@ function Ustawienia() {
                     preset.color2,
                     preset.color3,
                     preset.color4,
+                    preset.color5,
                   ].map((c, i) => (
                     <div
                       key={i}
@@ -439,6 +492,7 @@ function Ustawienia() {
                       preset.color2,
                       preset.color3,
                       preset.color4,
+                      preset.color5,
                     ].map((c, i) => (
                       <div
                         key={i}
@@ -457,13 +511,13 @@ function Ustawienia() {
                       </button>
                     )} */}
                     <button
-                      onClick={() => handleEditClick(preset)}
+                      onClick={(e) => { e.stopPropagation(); handleEditClick(preset)}}
                       className="flex-1 py-1.5 rounded bg-white/5 hover:bg-white/10 transition-all cursor-pointer"
                     >
                       Edytuj
                     </button>
                     <button
-                      onClick={() => handleDelete(preset.id)}
+                      onClick={(e) => {e.stopPropagation(); handleDelete(preset.id)}}
                       className="flex-1 py-1.5 rounded bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-all cursor-pointer"
                     >
                       Usuń
