@@ -8,6 +8,8 @@ import authRoutes from './routes/authRoutes.js';
 import { Server }  from 'socket.io';
 import { createServer } from 'http';
 import presetRoutes from './routes/presetRoutes.js'
+import wss from './config/wss.js'
+
 
 config();
 connectDB();
@@ -21,21 +23,22 @@ app.use(cookieParser());
 
 // Definicja dozwolonych źródeł (origins) dla CORS
 const allowedOrigins = [
-    'http://localhost:5173', // Frontend development
+    'http://0.0.0.0:5173', // Frontend development
     // moja produkcyjna domena np. 'analizator.pl'
 ]
 
 // CORS middleware
 app.use(cors({
     //origin: 'http://localhost:5173',
-    origin: function (origin, callback) {
-        if (!origin) return callback(null, true);
-        if (allowedOrigins.indexOf(origin) !== -1) {
-            callback(null, true);
-        } else {
-            callback(new Error("nie dozwolony origin"))
-        }
-    },
+    // origin: function (origin, callback) {
+    //     if (!origin) return callback(null, true);
+    //     if (allowedOrigins.indexOf(origin) !== -1) {
+    //         callback(null, true);
+    //     } else {
+    //         callback(new Error("nie dozwolony origin"))
+    //     }
+    // },
+    origin: true,
     // pozwól na wysyłanie ciasteczek (credentials) z tego origin
     credentials: true,
     // dozwolone metody HTTP
@@ -57,7 +60,7 @@ const server = createServer(app);
 // inicjalizacja socket.io
 const io = new Server(server, {
     cors: {
-        origin: allowedOrigins,
+        origin: true,
         credentials: true,
     }
 })
@@ -69,11 +72,24 @@ io.on("connection", (socket) => {
     // urządzenie wysyła dane częstotliwości
     socket.on("frequencies", (data) => {
         // przekazuje dane do wszystkich podłączonych fromontendów (dashboardów)
+        console.log("Otrzymano dane częstotliwości:", data);
         io.emit("frequencies", data);
     })
 
     socket.on("disconnect", () => {
         console.log("Rozłączono:", socket.id);
+    })
+})
+// obsługa wiadomości od urządzenia
+wss.on('connection', (ws) => {
+    ws.on('message', (data) => {
+        try {
+            const parsed = JSON.parse(data)
+            console.log('Odebrano dane z urządzenia:', parsed)
+            io.emit('frequencies', parsed)
+        } catch (err) {
+            console.error('Błąd parsowania:', err)
+        }
     })
 })
 
